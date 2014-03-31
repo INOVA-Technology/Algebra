@@ -2,26 +2,28 @@
 
 class Solver
 
-	attr_accessor :n, :verbose
+	attr_accessor :n, :answer, :solution, :verbose
 
-	def initialize
+	def initialize equation, accuracy, verbose
 		@n = 0
 		@precision = 1
-		@equation = ARGV[0]
-		@verbose = (ARGV[1] == "-v" ? true : false)
+		@accuracy = accuracy
+		@equation = equation
+		@solution = eval(@equation.split("=")[1]).round @accuracy
+		@verbose = verbose
 	end
 
 	def try_equation
 		new_eq = @equation.gsub /x/i, @n.to_s
 		new_eq.gsub! /sqrt\(/i, "Math.sqrt("
-		puts "Trying #{new_eq}" if verbose
-		equality = new_eq.split "="
-		answer = [eval(equality[0]), eval(equality[1])]
-		if answer[0] > answer [1]
-			@n -= 1
+		equality = new_eq.split("=")[0]
+		puts "Trying #{equality} = #{@solution}" if @verbose
+		@answer = eval(equality).round @accuracy
+		if @answer > @solution
+			subtract_from_n
 			add_precision
 		end
-		(answer.map(&:to_f).uniq.size == 1 ? true : false)
+		@answer == @solution
 	end
 
 	def add_to_n
@@ -34,10 +36,21 @@ class Solver
 		end
 	end
 
+	def subtract_from_n
+		case @n
+		when Fixnum
+			@n -= @precision
+		when Float
+			num_to_subtract = "0.#{'0' * (@precision - 1)}1".to_f
+			@n = ("%.#{@precision}f" % (@n - num_to_subtract)).to_f
+		end
+	end
+
 	def add_precision
 		case @n
 		when Fixnum
 			@n = "#{n}.1".to_f
+			# @n = @n.to_f
 		when Float
 			num_to_add = "0.#{'0' * @precision}1".to_f
 			@precision += 1
@@ -46,11 +59,24 @@ class Solver
 	end
 end
 
-s = Solver.new
+until ARGV.empty?
+	case ARGV[0]
+	when "-v"
+		verbose = true
+		ARGV.shift
+	when "-a"
+		ARGV.shift
+		accuracy = ARGV.shift.to_i
+	else
+		equation = ARGV.shift
+	end
+end
+
+s = Solver.new equation, accuracy ||= 2, verbose ||= false
 
 result = s.try_equation
 until result 
-	s.add_to_n
+	s.add_to_n unless s.answer > s.solution
 	result = s.try_equation
 end
 
