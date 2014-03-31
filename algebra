@@ -17,7 +17,7 @@ class Solver
 		new_eq = @equation.gsub /x/i, @n.to_s
 		new_eq.gsub! /sqrt\(/i, "Math.sqrt("
 		equality = new_eq.split("=")[0]
-		puts "Trying #{equality} = #{@solution}" if @verbose
+		puts "Trying #{equality} = #{@solution}".squeeze " " if @verbose
 		@answer = eval(equality).round @accuracy
 		if @answer > @solution
 			subtract_from_n
