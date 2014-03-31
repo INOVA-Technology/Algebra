@@ -28,7 +28,8 @@ class Solver
 		when Fixnum
 			@n += @precision
 		when Float
-			@n = ("%.1f" % (@n + @precision)).to_f
+			num_to_add = "0.#{'0' * (@precision - 1)}1".to_f
+			@n = ("%.#{@precision}f" % (@n + num_to_add)).to_f
 		end
 	end
 
@@ -36,7 +37,10 @@ class Solver
 		case @n
 		when Fixnum
 			@n = "#{n}.1".to_f
-			@precision = 0.1
+		when Float
+			num_to_add = "0.#{'0' * @precision}1".to_f
+			@precision += 1
+			@n = ("%.#{@precision}f" % (@n + num_to_add)).to_f
 		end
 	end
 end
