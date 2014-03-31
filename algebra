@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+
+class Solver
+
+	attr_accessor :n, :verbose
+
+	def initialize
+		@n = 0
+		@precision = 1
+		@equation = ARGV[0]
+		@verbose = (ARGV[1] == "-v" ? true : false)
+	end
+
+	def try_equation
+		new_eq = @equation.gsub /x/, @n.to_s
+		puts "Trying #{new_eq}" if verbose
+		equality = new_eq.split "=="
+		answer = [eval(equality[0]), eval(equality[1])]
+		if answer[0] > answer [1]
+			@n -= 1
+			add_precision
+		end
+		(answer.map(&:to_f).uniq.size == 1 ? true : false)
+	end
+
+	def add_to_n
+		case @n
+		when Fixnum
+			@n += @precision
+		when Float
+			@n = ("%.1f" % (@n + @precision)).to_f
+		end
+	end
+
+	def add_precision
+		case @n
+		when Fixnum
+			@n = "#{n}.1".to_f
+			@precision = 0.1
+		end
+	end
+end
+
+s = Solver.new
+
+result = s.try_equation
+until result 
+	s.add_to_n
+	result = s.try_equation
+end
+
+puts "x = #{s.n}"
