@@ -12,9 +12,10 @@ class Solver
 	end
 
 	def try_equation
-		new_eq = @equation.gsub /x/, @n.to_s
+		new_eq = @equation.gsub /x/i, @n.to_s
+		new_eq.gsub! /sqrt\(/i, "Math.sqrt("
 		puts "Trying #{new_eq}" if verbose
-		equality = new_eq.split "=="
+		equality = new_eq.split "="
 		answer = [eval(equality[0]), eval(equality[1])]
 		if answer[0] > answer [1]
 			@n -= 1
