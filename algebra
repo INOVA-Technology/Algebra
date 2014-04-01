@@ -15,9 +15,8 @@ class Solver
 
 	def evaluate expr
 		expr.gsub! /x/i, @n.to_s
-		expr.gsub! /sqrt/i, "Math::sqrt"
-		expr.gsub! /pi/i, "Math::PI"
-		expr.gsub! /e/i, "Math::E"
+		expr.gsub!(/(sqrt|log)/i) { "Math::#{$1.downcase}" }
+		expr.gsub!(/(pi|e)/i) { "Math::#{$1.upcase}" }
 		eval(expr).round @accuracy
 	end
 
