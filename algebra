@@ -2,28 +2,32 @@
 
 class Solver
 
-	attr_accessor :n, :answer, :solution, :verbose
+	attr_accessor :n, :guess, :answer, :verbose
 
 	def initialize equation, accuracy, verbose
 		@n = 0
 		@precision = 1
 		@accuracy = accuracy
 		@equation = equation
-		@solution = eval(@equation.split("=")[1]).round @accuracy
+		@answer = evaluate @equation.split("=")[1]
 		@verbose = verbose
 	end
 
+	def evaluate expr
+		expr.gsub! /x/i, @n.to_s
+		expr.gsub! /sqrt\(/i, "Math.sqrt("
+		eval(expr).round @accuracy
+	end
+
 	def try_equation
-		new_eq = @equation.gsub /x/i, @n.to_s
-		new_eq.gsub! /sqrt\(/i, "Math.sqrt("
-		equality = new_eq.split("=")[0]
-		puts "Trying #{equality} = #{@solution}".squeeze " " if @verbose
-		@answer = eval(equality).round @accuracy
-		if @answer > @solution
+		equality = @equation.split("=")[0].gsub /x/i, @n.to_s
+		puts "Trying #{equality} = #{@answer}".squeeze " " if @verbose
+		@guess = evaluate equality
+		if @guess > @answer
 			subtract_from_n
 			add_precision
 		end
-		@answer == @solution
+		@guess == @answer
 	end
 
 	def add_to_n
@@ -64,7 +68,7 @@ until ARGV.empty?
 	when "-v"
 		verbose = true
 		ARGV.shift
-	when "-a"
+	when "-a", "-p"
 		ARGV.shift
 		accuracy = ARGV.shift.to_i
 	else
@@ -76,7 +80,7 @@ s = Solver.new equation, accuracy ||= 2, verbose ||= false
 
 result = s.try_equation
 until result 
-	s.add_to_n unless s.answer > s.solution
+	s.add_to_n unless s.guess > s.answer
 	result = s.try_equation
 end
 
